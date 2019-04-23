@@ -16,7 +16,7 @@ namespace FineTorrent.Application.Decoders
         private static byte ByteArrayDivider = System.Text.Encoding.UTF8.GetBytes(":")[0]; //  58
 
 
-        public static object Decode(IEnumerator<byte> bytes)
+        public object Decode(IEnumerator<byte> bytes)
         {
             var b = bytes.Current;
             if (b == DictionaryStart) return DecodeDict(bytes);
@@ -26,7 +26,7 @@ namespace FineTorrent.Application.Decoders
             return DecodeByteArray(bytes);
         }
 
-        public static long DecodeNum(IEnumerator<byte> bytes)
+        public long DecodeNum(IEnumerator<byte> bytes)
         {
             List<byte> numBytes = new List<byte>();
 
@@ -43,7 +43,7 @@ namespace FineTorrent.Application.Decoders
             return Int64.Parse(numAsString);
         }
 
-        public static byte[] DecodeByteArray(IEnumerator<byte> bytes)
+        public byte[] DecodeByteArray(IEnumerator<byte> bytes)
         {
             List<byte> lengthBytes = new List<byte>();
 
@@ -75,7 +75,7 @@ namespace FineTorrent.Application.Decoders
             return bytess;
         }
 
-        public static List<object> DecodeList(IEnumerator<byte> bytes)
+        public List<object> DecodeList(IEnumerator<byte> bytes)
         {
             List<object> list = new List<object>();
 
@@ -91,7 +91,7 @@ namespace FineTorrent.Application.Decoders
             return list;
         }
 
-        public static Dictionary<string, object> DecodeDict(IEnumerator<byte> bytes)
+        public Dictionary<string, object> DecodeDict(IEnumerator<byte> bytes)
         {
             Dictionary<string, object> dict = new Dictionary<string, object>();
             List<string> keys = new List<string>();
