@@ -21,7 +21,10 @@ namespace FineTorrent.Application.TorrentFileHandler
 
             var name = Path.GetFileNameWithoutExtension(torrentFilePath);
 
+            var torrent = ParseTorrentObject(decoded);
+            torrent.Name = name;
 
+            return torrent;
         }
 
         public Torrent ParseTorrentObject(object obj)
@@ -39,11 +42,7 @@ namespace FineTorrent.Application.TorrentFileHandler
 
             torrent.FileItems = new List<FileItem>();
 
-            if (info.ContainsKey("name")) //Can be single, can be many
-            {
-                torrent.FileItems.Add(ParseSingleFileItemObject(info));
-            }
-            else
+            if (info.ContainsKey("files")) //Can be single, can be many
             {
                 long offset = 0;
                 foreach (var file in info["files"] as List<object>)
@@ -52,20 +51,36 @@ namespace FineTorrent.Application.TorrentFileHandler
 
                 }
             }
+            else
+            {
+                torrent.FileItems.Add(ParseSingleFileItemObject(info));
+            }
 
-            //TODO: get piece length, etc.
+            torrent.PieceSize = Convert.ToInt32(info["piece length"]);
+
+            var pieceHashes = (byte[]) info["pieces"]; //TODO: whats up with this?
+
+            torrent.IsPrivate = (long) info["private"] == 1L;
+
+            //optional arguments
+
+            if (arguments.ContainsKey("comment")) torrent.Comment = ByteObjectToUTF8(arguments["comment"]);
+            if (arguments.ContainsKey("created by")) torrent.CreatedBy = ByteObjectToUTF8(arguments["created by"]);
+            if (arguments.ContainsKey("creation date")) torrent.CreationDate = UnixTimeStampToDateTime(Convert.ToDouble(arguments["creation date"]));
+            if (arguments.ContainsKey("encoding")) torrent.Encoding = Encoding.GetEncoding(ByteObjectToUTF8(arguments["encoding"]));
 
 
+            return torrent;
         }
 
         public FileItem ParseSingleFileItemObject(object obj)
         {
-            
+
             var dict = obj as Dictionary<string, object>;
             var path = String.Join(Path.DirectorySeparatorChar.ToString(),
                 ((List<object>) dict["path"]).Select(s => ByteObjectToUTF8(s)));
 
-            var fileItem = new FileItem { Path = path, Size = (long)dict["length"], Offset = 0 };
+            var fileItem = new FileItem {Path = path, Size = (long) dict["length"], Offset = 0};
 
             return fileItem;
         }
@@ -73,7 +88,10 @@ namespace FineTorrent.Application.TorrentFileHandler
         public FileItem ParseMultiFileItemObjects(object obj, ref long offset)
         {
             var dict = obj as Dictionary<string, object>;
-            var fileItem = new FileItem { Path = ByteObjectToUTF8(dict["name"]), Size = (long)dict["length"], Offset = offset };
+            var path = String.Join(Path.DirectorySeparatorChar.ToString(),
+                ((List<object>)dict["path"]).Select(s => ByteObjectToUTF8(s)));
+
+            var fileItem = new FileItem { Path = path, Size = (long)dict["length"], Offset = offset };
             offset += fileItem.Size;
 
             return fileItem;
@@ -86,7 +104,16 @@ namespace FineTorrent.Application.TorrentFileHandler
             if (arguments == null) throw new ArgumentException("Invalid torrent object");
             if (!arguments.ContainsKey("info")) throw new ArgumentException("Missing info arguments");
             if (!arguments.ContainsKey("announce")) throw new ArgumentException("Missing announce argument");
+            
 
+        }
+
+        private DateTime UnixTimeStampToDateTime(double unixTimeStamp)
+        {
+            // Unix timestamp is seconds past epoch
+            System.DateTime dtDateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, System.DateTimeKind.Utc);
+            dtDateTime = dtDateTime.AddSeconds(unixTimeStamp).ToLocalTime();
+            return dtDateTime;
         }
 
         private string ByteObjectToUTF8(object obj)

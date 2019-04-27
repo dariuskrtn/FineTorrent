@@ -1,7 +1,9 @@
-﻿using Ninject;
+﻿using FineTorrent.Application.TorrentFileHandler;
+using Ninject;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using FineTorrent.Application.Decoders;
 
 namespace FineTorrent
 {
@@ -13,6 +15,9 @@ namespace FineTorrent
         {
             //TODO: Setup dependencies
             _standardKernel = new StandardKernel();
+
+            _standardKernel.Bind<BDecoder>().ToMethod(_ => new BDecoder()).InSingletonScope();
+            _standardKernel.Bind<TorrentFileHandler>().ToMethod(_ => new TorrentFileHandler(Get<BDecoder>())).InSingletonScope();
 
         }
 

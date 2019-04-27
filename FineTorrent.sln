@@ -7,7 +7,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FineTorrent", "FineTorrent\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FineTorrent.Domain", "FineTorrent.Domain\FineTorrent.Domain.csproj", "{726A1A6D-71BC-4D52-94E1-97E90310C699}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FineTorrent.Application", "FineTorrent.Application\FineTorrent.Application.csproj", "{3D19CC5F-8B39-4BF2-A8E0-CFE35301F74C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FineTorrent.Application", "FineTorrent.Application\FineTorrent.Application.csproj", "{3D19CC5F-8B39-4BF2-A8E0-CFE35301F74C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FineTorrent.Client", "FineTorrent.Client\FineTorrent.Client.csproj", "{7DCB31C3-31D6-4A3C-BCA9-0291CB53F7E0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -27,6 +29,10 @@ Global
 		{3D19CC5F-8B39-4BF2-A8E0-CFE35301F74C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3D19CC5F-8B39-4BF2-A8E0-CFE35301F74C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3D19CC5F-8B39-4BF2-A8E0-CFE35301F74C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7DCB31C3-31D6-4A3C-BCA9-0291CB53F7E0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7DCB31C3-31D6-4A3C-BCA9-0291CB53F7E0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7DCB31C3-31D6-4A3C-BCA9-0291CB53F7E0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7DCB31C3-31D6-4A3C-BCA9-0291CB53F7E0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

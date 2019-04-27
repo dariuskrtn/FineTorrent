@@ -9,4 +9,13 @@
     <PackageReference Include="Ninject" Version="3.3.4" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\FineTorrent.Application\FineTorrent.Application.csproj">
+      <Private>true</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\FineTorrent.Domain\FineTorrent.Domain.csproj">
+      <Private>true</Private>
+    </ProjectReference>
+  </ItemGroup>
+
 </Project>

@@ -16,8 +16,10 @@ namespace FineTorrent.Application.Decoders
         private static byte ByteArrayDivider = System.Text.Encoding.UTF8.GetBytes(":")[0]; //  58
 
 
-        public object Decode(IEnumerator<byte> bytes)
+        public object Decode(IEnumerator<byte> bytes, bool moveNext = true)
         {
+            if (moveNext) bytes.MoveNext();
+            
             var b = bytes.Current;
             if (b == DictionaryStart) return DecodeDict(bytes);
             if (b == NumberStart) return DecodeNum(bytes);
@@ -85,7 +87,7 @@ namespace FineTorrent.Application.Decoders
                 if (bytes.Current == ListEnd)
                     break;
 
-                list.Add(Decode(bytes));
+                list.Add(Decode(bytes, false));
             }
 
             return list;
@@ -104,7 +106,7 @@ namespace FineTorrent.Application.Decoders
 
                 // all keys are valid UTF8 strings
                 string key = Encoding.UTF8.GetString(DecodeByteArray(bytes));
-                bytes.MoveNext();
+                //bytes.MoveNext();
                 object val = Decode(bytes);
 
                 keys.Add(key);

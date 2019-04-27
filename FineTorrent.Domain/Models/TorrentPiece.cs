@@ -4,6 +4,5 @@
     {
         public byte[] Hash { get; set; }
         public bool Verified { get; set; }
-        public int Size { get; set; }
     }
 }
