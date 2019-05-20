@@ -48,5 +48,19 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\FineTorrent.Application\FineTorrent.Application.csproj">
+      <Project>{3d19cc5f-8b39-4bf2-a8e0-cfe35301f74c}</Project>
+      <Name>FineTorrent.Application</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\FineTorrent.Domain\FineTorrent.Domain.csproj">
+      <Project>{726a1a6d-71bc-4d52-94e1-97e90310c699}</Project>
+      <Name>FineTorrent.Domain</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\FineTorrent\FineTorrent.csproj">
+      <Project>{1211c66c-405d-45af-bb2c-8710dcfa1682}</Project>
+      <Name>FineTorrent</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -1,15 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
+using System.Web;
 using BitConverter;
 using FineTorrent.Application.Decoders;
 using FineTorrent.Domain.Enums;
 
 namespace FineTorrent.Application.TrackerApi
 {
-    public class TrackerApi
+    public class TrackerApi : ITrackerApi
     {
         private readonly BDecoder _decoder;
 
@@ -35,23 +37,37 @@ namespace FineTorrent.Application.TrackerApi
 
         private string SetupGetUrl(TrackerRequest request)
         {
+            if (request.Event == TrackerEvent.Regular)
+            {
+                return String.Format("{0}?info_hash={1}&peer_id={2}&port={3}&uploaded={4}&downloaded={5}&left={6}&compact={7}",
+                    request.Tracker, HttpUtility.UrlEncode(request.InfoHash),
+                    HttpUtility.UrlEncode(request.PeerId), request.Port,
+                    request.Uploaded, request.Downloaded, request.Left,
+                    (request.Compact ? 1 : 0));
+            }
+
             return String.Format("{0}?info_hash={1}&peer_id={2}&port={3}&uploaded={4}&downloaded={5}&left={6}&event={7}&compact={8}",
-                request.Tracker, request.InfoHash,
+                request.Tracker, HttpUtility.UrlEncode(request.InfoHash),
                 request.PeerId, request.Port,
                 request.Uploaded, request.Downloaded, request.Left,
-                Enum.GetName(typeof(TrackerEvent), request.Event).ToLower());
+                Enum.GetName(typeof(TrackerEvent), request.Event).ToLower(), (request.Compact?1:0));
         }
 
         private TrackerResponse ParseResponse(byte[] data)
         {
             var response = new TrackerResponse();
 
-            Dictionary<string, object> info = _decoder.Decode((IEnumerator<byte>)data.GetEnumerator()) as Dictionary<string, object>;
+            Dictionary<string, object> info = (Dictionary<string, object>) _decoder.Decode(data.Select(x => x).GetEnumerator());
+
+            if (info.ContainsKey("failure reason"))
+            {
+                response.FailureReason = (string) info["failure reason"];
+                return response;
+            }
 
             response.Interval = (long) info["interval"];
             response.Complete = (long) info["complete"];
             response.Incomplete = (long) info["incomplete"];
-            response.Downloaded = (long) info["downloaded"];
 
             response.Peers = new List<string>();
 

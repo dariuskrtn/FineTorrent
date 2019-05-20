@@ -10,6 +10,7 @@ namespace FineTorrent.Client
     {
         static void Main(string[] args)
         {
+            var torrent = new Torrent();
         }
     }
 }

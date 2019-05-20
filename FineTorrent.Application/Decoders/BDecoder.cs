@@ -1,5 +1,7 @@
-﻿using System;
+﻿using FineTorrent.Application.Extensions;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 
@@ -115,11 +117,82 @@ namespace FineTorrent.Application.Decoders
 
             // verify incoming dictionary is sorted correctly
             // we will not be able to create an identical encoding otherwise
-            var sortedKeys = keys.OrderBy(x => BitConverter.ToString(Encoding.UTF8.GetBytes(x)));
+            var sortedKeys = keys.OrderBy(x => System.BitConverter.ToString(Encoding.UTF8.GetBytes(x)));
             if (!keys.SequenceEqual(sortedKeys))
                 throw new Exception("error loading dictionary: keys not sorted");
 
             return dict;
         }
+
+        #region Encode
+
+        public byte[] Encode(object obj)
+        {
+            MemoryStream buffer = new MemoryStream();
+
+            EncodeNextObject(buffer, obj);
+
+            return buffer.ToArray();
+        }
+
+        private void EncodeNextObject(MemoryStream buffer, object obj)
+        {
+            if (obj is byte[])
+                EncodeByteArray(buffer, (byte[])obj);
+            else if (obj is string)
+                EncodeString(buffer, (string)obj);
+            else if (obj is long)
+                EncodeNumber(buffer, (long)obj);
+            else if (obj.GetType() == typeof(List<object>))
+                EncodeList(buffer, (List<object>)obj);
+            else if (obj.GetType() == typeof(Dictionary<string, object>))
+                EncodeDictionary(buffer, (Dictionary<string, object>)obj);
+            else
+                throw new Exception("unable to encode type " + obj.GetType());
+        }
+
+        private void EncodeByteArray(MemoryStream buffer, byte[] body)
+        {
+            buffer.Append(Encoding.UTF8.GetBytes(Convert.ToString(body.Length)));
+            buffer.Append(ByteArrayDivider);
+            buffer.Append(body);
+        }
+
+        private void EncodeString(MemoryStream buffer, string input)
+        {
+            EncodeByteArray(buffer, Encoding.UTF8.GetBytes(input));
+        }
+
+        private void EncodeNumber(MemoryStream buffer, long input)
+        {
+            buffer.Append(NumberStart);
+            buffer.Append(Encoding.UTF8.GetBytes(Convert.ToString(input)));
+            buffer.Append(NumberEnd);
+        }
+
+        private void EncodeList(MemoryStream buffer, List<object> input)
+        {
+            buffer.Append(ListStart);
+            foreach (var item in input)
+                EncodeNextObject(buffer, item);
+            buffer.Append(ListEnd);
+        }
+
+        private void EncodeDictionary(MemoryStream buffer, Dictionary<string, object> input)
+        {
+            buffer.Append(DictionaryStart);
+            
+            // we need to sort the keys by their raw bytes, not the string
+            var sortedKeys = input.Keys.ToList().OrderBy(x => System.BitConverter.ToString(Encoding.UTF8.GetBytes(x)));
+
+            foreach (var key in sortedKeys)
+            {
+                EncodeString(buffer, key);
+                EncodeNextObject(buffer, input[key]);
+            }
+            buffer.Append(DictionaryEnd);
+        }
+
+        #endregion
     }
 }

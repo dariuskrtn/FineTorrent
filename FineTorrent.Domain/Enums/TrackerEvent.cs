@@ -2,6 +2,7 @@
 {
     public enum TrackerEvent
     {
+        Regular,
         Started,
         Paused,
         Stopped

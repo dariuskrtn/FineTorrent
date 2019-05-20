@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using FineTorrent.Application.Decoders;
 using FineTorrent.Domain.Models;
@@ -15,7 +16,7 @@ namespace FineTorrent.Application.TorrentFileHandler
         {
             _decoder = decoder ?? throw new System.ArgumentNullException(nameof(decoder));
         }
-        public Torrent LoadFromFilePath(string torrentFilePath)
+        public TorrentFile LoadFromFilePath(string torrentFilePath)
         {
             var decoded = _decoder.Decode(((IEnumerable<byte>)File.ReadAllBytes(torrentFilePath)).GetEnumerator());
 
@@ -27,16 +28,24 @@ namespace FineTorrent.Application.TorrentFileHandler
             return torrent;
         }
 
-        public Torrent ParseTorrentObject(object obj)
+        public TorrentFile ParseTorrentObject(object obj)
         {
             ValidateTorrentObject(obj);
 
-            var torrent = new Torrent();
+            var torrent = new TorrentFile();
 
             var arguments = (Dictionary<string, object>) obj;
 
             torrent.Trackers = new List<string>();
-            torrent.Trackers.Add(ByteObjectToUTF8(arguments["announce"])); 
+            torrent.Trackers.Add(ByteObjectToUTF8(arguments["announce"]));
+            if (arguments.ContainsKey("announce-list"))
+            {
+                foreach (var trackerList in arguments["announce-list"] as List<object>)
+                {
+                    var list = trackerList as List<object>;
+                    torrent.Trackers.Add(ByteObjectToUTF8(list[0]));
+                }
+            }
 
             var info = (Dictionary<string, object>)arguments["info"];
 
@@ -56,11 +65,21 @@ namespace FineTorrent.Application.TorrentFileHandler
                 torrent.FileItems.Add(ParseSingleFileItemObject(info));
             }
 
+            torrent.Size = Enumerable.Sum(torrent.FileItems.Select(file => file.Size));
+            torrent.InfoHash = SHA1.Create().ComputeHash(_decoder.Encode(info));
+
             torrent.PieceSize = Convert.ToInt32(info["piece length"]);
 
-            var pieceHashes = (byte[]) info["pieces"]; //TODO: whats up with this?
+            var pieceHashes = (byte[]) info["pieces"];
+            torrent.PieceHashes = new List<byte[]>();
 
-            torrent.IsPrivate = (long) info["private"] == 1L;
+            for (int i = 0; i < pieceHashes.Length; i+=20)
+            {
+                var hash = new byte[20];
+                Array.Copy(pieceHashes, i, hash, 0, 20);
+                torrent.PieceHashes.Add(hash);
+            }
+
 
             //optional arguments
 
@@ -77,8 +96,7 @@ namespace FineTorrent.Application.TorrentFileHandler
         {
 
             var dict = obj as Dictionary<string, object>;
-            var path = String.Join(Path.DirectorySeparatorChar.ToString(),
-                ((List<object>) dict["path"]).Select(s => ByteObjectToUTF8(s)));
+            var path = ByteObjectToUTF8(dict["name"]);
 
             var fileItem = new FileItem {Path = path, Size = (long) dict["length"], Offset = 0};
 
@@ -104,8 +122,6 @@ namespace FineTorrent.Application.TorrentFileHandler
             if (arguments == null) throw new ArgumentException("Invalid torrent object");
             if (!arguments.ContainsKey("info")) throw new ArgumentException("Missing info arguments");
             if (!arguments.ContainsKey("announce")) throw new ArgumentException("Missing announce argument");
-            
-
         }
 
         private DateTime UnixTimeStampToDateTime(double unixTimeStamp)

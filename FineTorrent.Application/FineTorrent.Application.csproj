@@ -5,6 +5,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="EndianBitConverter" Version="1.1.0" />
+    <PackageReference Include="System.Reactive" Version="4.1.5" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\FineTorrent.Domain\FineTorrent.Domain.csproj" />
   </ItemGroup>
 
