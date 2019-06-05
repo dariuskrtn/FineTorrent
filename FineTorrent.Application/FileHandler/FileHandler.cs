@@ -18,6 +18,10 @@ namespace FineTorrent.Application.FileHandler
         private readonly int _pieceSize;
         private readonly ISubject<PieceResponse> _pieceResponseSubject = new Subject<PieceResponse>();
 
+        private readonly ISubject<float> _progressSubject = new Subject<float>();
+        private float _totalSize = 1;
+        private float _currentSize = 0;
+
         private object[] _locks;
 
         public FileHandler(string downloadPath, List<FileItem> torrentFiles, List<byte[]> pieceHashes, int pieceSize)
@@ -36,6 +40,8 @@ namespace FineTorrent.Application.FileHandler
 
             _locks = new object[_torrentFiles.Count];
             for (int i = 0; i < _locks.Length; i++) _locks[i] = new object();
+
+            _totalSize = _torrentFiles.Select(file => file.Size).Sum();
         }
 
         public async Task InitializeFiles()
@@ -143,6 +149,9 @@ namespace FineTorrent.Application.FileHandler
 
         private void SavePiece(PieceResponse pieceResponse)
         {
+            _currentSize += pieceResponse.Data.Length;
+            _progressSubject.OnNext((_currentSize/_totalSize)*100);
+
             var data = pieceResponse.Data;
             long currOffset = _pieceSize * pieceResponse.PieceIndex + pieceResponse.Offset;
 
@@ -226,6 +235,11 @@ namespace FineTorrent.Application.FileHandler
 
                 }
             }
+        }
+
+        public IObservable<float> GetProgressObservable()
+        {
+            return _progressSubject;
         }
 
         public void Dispose()

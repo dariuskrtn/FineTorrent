@@ -9,5 +9,6 @@ namespace FineTorrent.Application.FileHandler
         void SavePiece(int pieceId, int offset, byte[] data);
         byte[] GetPiece(int pieceId, int offset, int length);
         IObservable<int> GetPieceCompletedObservable();
+        IObservable<float> GetProgressObservable();
     }
 }

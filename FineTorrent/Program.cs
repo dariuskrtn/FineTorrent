@@ -12,7 +12,7 @@ namespace FineTorrent
         {
             new Thread(_ =>
             {
-                var torrent = new Torrent("C:\\Users\\Darius\\Downloads\\The.Simpsons.S30E23.WEBRip.x264-ION10-[rarbg.to].torrent", "C:\\Users\\Darius\\Desktop");
+                var torrent = new Torrent("C:\\Users\\Darius\\Downloads\\The.Simpsons.S29.Springfield.of.Dreams.The.Legend.of.Homer.Simpson.720p.FOX.WEB-DL.AAC2.0.x264-BTN.torrent", "C:\\Users\\Darius\\Desktop");
                 torrent.GetProgressObservable().Subscribe(percent => Console.WriteLine("----------------------------------------------Progress: " + percent));
                 torrent.StartDownload().ConfigureAwait(false).GetAwaiter().GetResult();
             }).Start();

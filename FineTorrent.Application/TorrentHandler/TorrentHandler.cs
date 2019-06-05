@@ -68,7 +68,7 @@ namespace FineTorrent.Application.TorrentHandler
                     HandleTrackerResponse(response);
 
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
                     Console.WriteLine("Failed to connect to tracker: " + tracker);
                 }

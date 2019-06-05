@@ -75,7 +75,7 @@ namespace FineTorrent.Application.DownloadStrategy
 
         public IObservable<float> GetProgressObservable()
         {
-            return _progressSubject;
+            return _fileHandler.GetProgressObservable();
         }
 
         public void StartDownload()

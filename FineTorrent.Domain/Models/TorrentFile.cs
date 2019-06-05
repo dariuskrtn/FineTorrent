@@ -7,7 +7,6 @@ namespace FineTorrent.Domain.Models
     public class TorrentFile
     {
         public string Name { get; set; }
-        public string Tracker { get; set; }
         public List<string> Trackers { get; set; }
         public DateTime CreationDate { get; set; }
         public string Comment { get; set; }
